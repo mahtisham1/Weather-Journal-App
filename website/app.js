@@ -8,44 +8,35 @@ let newDate = (d.getMonth()+1)+'.'+ d.getDate()+'.'+ d.getFullYear();
 document.getElementById('generate').addEventListener('click', performAction);
 
 function performAction(e){
-    // e.preventDefault();
+    e.preventDefault();
 
     let zipCode = document.getElementById('zip').value;
     let feelings = document.getElementById('feelings').value;
-    // let temp = document.getElementById('temp').value;
 
     let baseURL = `https://api.openweathermap.org/data/2.5/weather?zip=${zipCode}&appid=${apiKey}`
 
     getData(baseURL, zipCode, feelings, apiKey)
-    // New Syntax!
-    .then(function(data){
-      // Add data
-    //   console.log(data);
-      postData('/add',{data: newDate, temp: data.main.temp, content: feelings});
+    .then(async function(data){
+      data = await postData('/add',{date: newDate, temp: data.main.temp, city: data.name, content: feelings});
+      updateUI(data)
     })
-
-    .then(
-      updateUI()
-    )
   }
-//   debugger
-  const getData = async (url, zip, feeling, key)=>{
 
+  const getData = async (url, zip, feeling, key)=>{
     const res = await fetch(url+zip+feeling+key)
 
     try {
       const data = await res.json();
-    //   let temp = data.main.temp;
       console.log(data);
 
       return data;
-    }  catch(error) {
+    } catch(error) {
       console.log("error", error);
-      // appropriately handle the error
     }
   }
+
   const postData = async (url = '', data = {}) =>{
-    debugger
+    console.log(data)
     const res = await fetch(url, {
       method: 'POST',
       mode: 'cors',
@@ -54,32 +45,16 @@ function performAction(e){
       headers: {
         'Content-Type': 'application/json'
       },
-      redirect: 'follow',
-      referrerPolicy: 'no-referrer',
       body: JSON.stringify(data)
     });
 
-    try {
-        const newData = await res.json();
-        console.log(newData);
-        return newData;
-    }catch(error) {
-        console.log("error", error);
-      }
+    return res.json()
   }
-debugger
-  const updateUI = async () => {
-    const req = await fetch('/all');
-    try{
-      const allData = await req.json();
-      const lastIndex = allData[allData.length - 1];
-      document.getElementById('date').innerHTML = newDate;
-      document.getElementById('temp').innerHTML = lastIndex.temp;
-      document.getElementById('content').innerHTML = lastIndex.feelings;
 
-    }catch(error){
-      console.log("error", error);
-    }
+  const updateUI = (data) => {
+      document.getElementById('date').innerHTML = `Date: ${data.date}`;
+      const tempConvert = (data.temp - 273.15).toFixed();
+      document.getElementById('temp').innerHTML = `Temperature: ${tempConvert} °C`;
+      document.getElementById('city').innerHTML = `City: ${data.city}`;
+      document.getElementById('content').innerHTML = `I'm feeling: ${data.feelings}`;
 }
-
-
