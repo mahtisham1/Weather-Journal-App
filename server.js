@@ -26,7 +26,6 @@ app.use(express.static('website'));
 const port = 3000;
 const server = app.listen(port, listening);
  function listening(){
-    // console.log(server);
     console.log(`running on localhost: ${port}`);
   };
 
@@ -47,11 +46,11 @@ app.post('/add', addData);
 function addData(req,res){
   console.log(req.body);
   newEntry = {
-    newDate: req.body.date,
+    date: req.body.date,
     temp: req.body.temp,
+    city: req.body.city,
     feelings : req.body.content
   };
   wheatherData.push(newEntry);
-  res.send(wheatherData)
-  console.log(wheatherData);
+  res.send(newEntry)
 }
